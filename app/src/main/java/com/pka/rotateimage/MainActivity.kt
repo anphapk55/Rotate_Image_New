@@ -23,23 +23,33 @@ class MainActivity : AppCompatActivity() {
     private var currentAcceleration = 0f
     private var lastAcceleration = 0f
 
+    private val SHAKE_SLOP_TIME_MS = 1000
+//    private val SHAKE_COUNT_RESET_TIME_MS = 3000
+
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        Objects.requireNonNull(mSensorManager)!!.registerListener(sensorListener, mSensorManager!!
-            .getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
+        Objects.requireNonNull(mSensorManager)!!.registerListener(
+            sensorListener, mSensorManager!!
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+        )
         acceleration = 10f
         currentAcceleration = SensorManager.GRAVITY_EARTH
         lastAcceleration = SensorManager.GRAVITY_EARTH
 
 
-        val btRotate = findViewById<Button>(R.id.bt_rotate)
-        btRotate.setOnClickListener {
+        val btRotateLeft = findViewById<Button>(R.id.bt_rotate_left)
+        btRotateLeft.setOnClickListener {
             val imageView = findViewById<ImageView>(R.id.img)
             imageView.rotation = imageView.rotation + 90 }
+
+        val btRotateRight = findViewById<Button>(R.id.bt_rotate_right)
+        btRotateRight.setOnClickListener {
+            val imageView = findViewById<ImageView>(R.id.img)
+            imageView.rotation = imageView.rotation - 90 }
     }
     private val sensorListener: SensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
@@ -51,9 +61,26 @@ class MainActivity : AppCompatActivity() {
             val delta: Float = currentAcceleration - lastAcceleration
             acceleration = acceleration * 0.9f + delta
             if (acceleration > 12) {
-                val imageView = findViewById<ImageView>(R.id.img)
-                imageView.rotation = imageView.rotation + 90
-                Toast.makeText(applicationContext, "Shake it love", Toast.LENGTH_SHORT).show()
+
+                var now : Long = System.currentTimeMillis();
+                // ignore shake events too close to each other (500ms)
+                var mShakeTimestamp: Long? = null
+                if (mShakeTimestamp != null) {
+                    if (mShakeTimestamp + SHAKE_SLOP_TIME_MS > now) {
+                        return;
+                    }
+                }
+                mShakeTimestamp = now
+
+                if (Round(x,4)< -10.0000){
+                    val imageView = findViewById<ImageView>(R.id.img)
+                    imageView.rotation = imageView.rotation - 90
+                    Toast.makeText(applicationContext, "Shake it Right", Toast.LENGTH_SHORT).show()
+                }else if (Round(x,4)>10.0000) {
+                    val imageView = findViewById<ImageView>(R.id.img)
+                    imageView.rotation = imageView.rotation + 90
+                    Toast.makeText(applicationContext, "Shake it Left", Toast.LENGTH_SHORT).show()
+                }
             }
         }
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
@@ -61,8 +88,10 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // Add the following line to register the Session Manager Listener onResume
-        mSensorManager?.registerListener(sensorListener, mSensorManager!!.getDefaultSensor(
-            Sensor .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+        mSensorManager?.registerListener(
+            sensorListener, mSensorManager!!.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER
+            ), SensorManager.SENSOR_DELAY_NORMAL
         )
     }
 
@@ -71,6 +100,14 @@ class MainActivity : AppCompatActivity() {
         mSensorManager?.unregisterListener(sensorListener)
         super.onPause()
     }
+    fun Round(Rval: Float, Rpl: Int): Float {
+        var Rval = Rval
+        val p = Math.pow(10.0, Rpl.toDouble()).toFloat()
+        Rval = Rval * p
+        val tmp = Math.round(Rval).toFloat()
+        return tmp / p
+    }
+
 }
 
 
