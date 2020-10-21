@@ -72,11 +72,11 @@ class MainActivity : AppCompatActivity() {
                 }
                 mShakeTimestamp = now
 
-                if (Round(x,4)< -10.0000){
+                if (Round(x,4)< -30.0000){
                     val imageView = findViewById<ImageView>(R.id.img)
                     imageView.rotation = imageView.rotation - 90
                     Toast.makeText(applicationContext, "Shake it Right", Toast.LENGTH_SHORT).show()
-                }else if (Round(x,4)>10.0000) {
+                }else if (Round(x,4)>30.0000) {
                     val imageView = findViewById<ImageView>(R.id.img)
                     imageView.rotation = imageView.rotation + 90
                     Toast.makeText(applicationContext, "Shake it Left", Toast.LENGTH_SHORT).show()
